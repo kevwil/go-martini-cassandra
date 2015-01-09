@@ -1,24 +1,19 @@
 package main
 
 import (
-	"html"
-	"myapp/app/models"
-	"time"
-
-	m "github.com/go-martini/martini"
-	c "github.com/gocql/gocql"
+	"github.com/go-martini/martini"
+	"github.com/kevwil/go-martini-cassandra/db"
+	"github.com/kevwil/go-martini-cassandra/models"
 )
 
-var session *c.Session
+var repo db.Repository
 
 func main() {
-	cluster := c.NewCluster("127.0.0.1")
-	cluster.Keyspace = "mykeyspace"
-	cluster.Consistency = c.One
-	session, _ := cluster.CreateSession()
-	defer session.Close()
+	repo := db.NewRepository("127.0.0.1", "mykeyspace")
+	repo.Begin()
+	defer repo.Finish()
 
-	mc := m.Classic()
+	mc := martini.Classic()
 	// mc.Get("/", GetHome)
 	// mc.Get("/favicon.ico", func() (int,string) {
 	//     return 404, "Not Found"
@@ -31,30 +26,10 @@ func main() {
 
 // GetBlogListing = retrieve list of blog posts
 func GetBlogListing() []*models.Post {
-	var posts []*models.Post
-	var id uint
-	var title, tags, content string
-	var date time.Time
-	iter := session.Query(`SELECT id,title,tags,content,date FROM posts`).Iter()
-	for iter.Scan(&id, &title, &tags, &content, &date) {
-		newPost := models.Post{Id: id, Title: html.EscapeString(title), Tags: tags, Content: content, Date: date}
-		posts = append(posts, &newPost)
-	}
-	if err := iter.Close(); err != nil {
-		panic(err)
-	}
-	return posts
+	return repo.GetAllPosts()
 }
 
 // GetBlogSingle = get a single blog post by title
-func GetBlogSingle(params m.Params) models.Post {
-	var id uint
-	var title, tags, content string
-	var date time.Time
-	err := session.Query(`SELECT id,title,tags,content,date FROM posts WHERE title = ? LIMIT 1`, params["title"]).Scan(&id, &title, &tags, &content, &date)
-	if err != nil {
-		panic(err)
-	}
-	newPost := models.Post{Id: id, Title: html.EscapeString(title), Tags: tags, Content: content, Date: date}
-	return newPost
+func GetBlogSingle(params martini.Params) models.Post {
+	return repo.GetSinglePost(params["title"])
 }
