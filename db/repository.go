@@ -7,26 +7,28 @@ import (
 	"time"
 )
 
-type Repository interface {
-	Begin()
-	Finish()
-	GetAllPosts() []*models.Post
-	GetSinglePost(title string) models.Post
-}
+// type Repo interface {
+// 	Begin()
+// 	Finish()
+// 	GetAllPosts() []*models.Post
+// 	GetSinglePost(title string) models.Post
+// }
 
-type repository struct {
+type Repository struct {
 	cc   *gocql.ClusterConfig
 	Sess *gocql.Session
 }
 
-func NewRepository(clusterAddr string, keyspace string) Repository {
+// var _ Repo = (*Repository)(nil)
+
+func NewRepository(clusterAddr string, keyspace string) *Repository {
 	cluster := gocql.NewCluster(clusterAddr)
 	cluster.Keyspace = keyspace
 	cluster.Consistency = gocql.One
-	return &repository{cc: cluster}
+	return &Repository{cc: cluster}
 }
 
-func (r *repository) Begin() {
+func (r *Repository) Begin() {
 	session, err := r.cc.CreateSession()
 	if err != nil {
 		panic(err)
@@ -34,11 +36,11 @@ func (r *repository) Begin() {
 	r.Sess = session
 }
 
-func (r *repository) Finish() {
+func (r *Repository) Finish() {
 	r.Sess.Close()
 }
 
-func (r *repository) GetAllPosts() []*models.Post {
+func (r *Repository) GetAllPosts() []*models.Post {
 	var posts []*models.Post
 	var id uint
 	var title, tags, content string
@@ -54,7 +56,7 @@ func (r *repository) GetAllPosts() []*models.Post {
 	return posts
 }
 
-func (r *repository) GetSinglePost(title string) models.Post {
+func (r *Repository) GetSinglePost(title string) models.Post {
 	var id uint
 	var mytitle, tags, content string
 	var date time.Time
