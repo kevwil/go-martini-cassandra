@@ -1,0 +1,29 @@
+
+{{template "header" .}}
+
+<header class="hero-unit" style="background-color:#A9F16C">
+  <div class="container">
+    <div class="row">
+      <div class="hero-text">
+        <h1>{{.PageTitle}}</h1>
+        <p></p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div>
+    {{range .Posts}}
+      <h3><a href="/blog/{{.Title}}">{{.Title}}</a></h3>
+      <p>{{.Content}}</p>
+      <footer>
+        <span class="id">{{.Id}}</span>
+        <span class="timestamp">{{.Date}}</span>
+        <span class="tags">{{.Tags}}</span>
+      </footer>
+    {{end}}
+  </div>
+</div>
+
+{{template "footer" .}}

@@ -1,0 +1,15 @@
+{{template "header" .}}
+
+<div class="container">
+  <div>
+    <h2>{{.Post.Title}}</h2>
+    <p>{{.Post.Content}}</p>
+    <footer>
+      <span class="id">{{.Post.Id}}</span>
+      <span class="timestamp">{{.Post.Date}}</span>
+      <span class="tags">{{.Post.Tags}}</span>
+    </footer>
+  </div>
+</div>
+
+{{template "footer" .}}
